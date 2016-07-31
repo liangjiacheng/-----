@@ -1,0 +1,403 @@
+Enter file contents here#include<stdio.h>
+#include<stdlib.h>
+#define Lenth sizeof(struct Result)
+
+struct Result
+{
+	char name[10];
+	int win;
+	int lost;
+	int res;
+	double probability;
+
+	struct Result *next;
+};
+
+int Game(int c);
+void interface();
+void Practice();
+void Battle();
+void Referee(int w, int l);
+void RankingList();
+void Save(struct Result *R);
+void Check();
+void Read();
+struct Result * Sort(struct Result *head);
+void Print(struct Result *R);
+
+
+
+
+
+
+#include"标头.h"
+
+
+void interface()
+{
+	int choice;
+
+	printf("********** 0.退    出 **********\n");
+	printf("********** 1.练习模式 **********\n");
+	printf("********** 2.实名对战 **********\n");
+	printf("********** 3.排 行 榜 **********\n");
+
+	printf("请输入你的选择：");
+	scanf("%d", &choice);
+
+	switch (choice)
+	{
+	case 0:break;
+	case 1:Practice(); system("cls"); interface(); break;
+	case 2:Battle(); system("cls"); interface(); break;
+	case 3:RankingList(); system("cls"); interface(); break;
+	default:
+		printf("请输入正确选择！\n");
+		interface();break;
+	}
+
+}
+
+int Game(int c)
+{
+	int com;
+
+	srand(time(0));
+	com = rand() % 3 + 1;
+
+	switch (c)
+	{
+	case 1:
+		printf("你出石头！\n");
+		if (com == 1)
+		{
+			printf("电脑出石头！\n");
+			return 0;
+			printf("\n");
+		}
+		else if (com == 2)
+		{
+			printf("电脑出剪刀！\n");
+			return 1;
+			printf("\n");
+		}
+		else if (com == 3)
+		{
+			printf("电脑出布！\n");
+			return -1;
+			printf("\n");
+		}
+		break;
+	case 2:
+		printf("你出剪刀！\n");
+		if (com == 1)
+		{
+			printf("电脑出石头！\n");
+			return -1;
+			printf("\n");
+		}
+		else if (com == 2)
+		{
+			printf("电脑出剪刀！\n");
+			return 0;
+			printf("\n");
+		}
+		else if (com == 3)
+		{
+			printf("电脑出布！\n");
+			return 1;
+			printf("\n");
+		}
+		break;
+	case 3:
+		printf("你出布！\n");
+		if (com == 1)
+		{
+			printf("电脑出石头！\n");
+			return 1;
+			printf("\n");
+		}
+		else if (com == 2)
+		{
+			printf("电脑出剪刀！\n");
+			return -1;
+			printf("\n");
+		}
+		else if (com == 3)
+		{
+			printf("电脑出布！\n");
+			return 0;
+			printf("\n");
+		}
+		break;
+	default:
+		printf("请输入正确选择！\n");
+		printf("\n");
+		return 0;
+		break;
+	}
+}
+
+void Practice()
+{
+	system("cls");
+	int choice;
+	struct Result r;
+	r.win = 0;
+	r.lost = 0;
+
+	printf("练习模式，三局两胜\n");
+	printf("1-石头，2-剪刀，3-布\n");
+
+	for (int i = 0; i < 3; i++)
+	{
+		printf("请输入你的选择：");
+		scanf("%d", &choice);
+		r.res = Game(choice);
+		printf("\n");
+		if (r.res ==1)
+		{
+			r.win++;
+		}
+		else if (r.res == -1)
+		{
+			r.lost++;
+		}
+	}
+
+	Referee(r.win, r.lost);
+	
+	system("pause");
+}
+
+void Battle()
+{
+	system("cls");
+	int choice, n;
+	struct Result r;
+	r.win = 0;
+	r.lost = 0;
+
+	printf("对战模式\n");
+	printf("请输入姓名：");
+	scanf("%s", r.name);
+	printf("请输入回合数：");
+	scanf("%d", &n);
+	printf("1-石头，2-剪刀，3-布\n");
+
+	for (int i = 0; i < n; i++)
+	{
+		printf("请输入你的选择：");
+		scanf("%d", &choice);
+		r.res = Game(choice);
+		printf("\n");
+		if (r.res == 1)
+		{
+			r.win++;
+		}
+		else if (r.res == -1)
+		{
+			r.lost++;
+		}
+	}
+	printf("姓名：%s  赢：%d  输：%d\n", r.name, r.win, r.lost);
+	Save(&r);
+
+	system("pause");
+}
+
+void Referee(int w, int l)
+{
+	if (w > l)
+	{
+		printf("你赢了！\n");
+	}
+	else if (w < l)
+	{
+		printf("你输了！\n");
+	}
+	else
+	{
+		printf("平局！\n");
+	}
+}
+
+void RankingList()
+{
+	system("cls");
+	Read();
+	system("pause");
+}
+
+void Save(struct Result *R)
+{
+	int flag = 0;
+	struct Result *p1, *head;
+	head = p1 = malloc(Lenth);
+	FILE *fp;
+	if (!(fp = fopen("RankingList.txt", "a+")))
+	{
+		printf("文件打开失败！\n");
+		exit(1);
+	}
+
+	while (fread(p1, Lenth, 1, fp))
+	{
+		if ((p1->win + p1->lost) == 0)
+		{
+			p1->probability = 0;
+		}
+		else
+		{
+			p1->probability = p1->win / (p1->win + p1->lost);
+		}
+		p1->next = malloc(Lenth);
+		p1 = p1->next;
+		p1->next = NULL;
+	}
+	p1->next = NULL;
+	p1 = NULL;
+	fclose(fp);
+
+	p1 = head;
+	while (p1->next)
+	{
+		if (strcmp(p1->name, R->name) == 0)
+		{
+			p1->win = p1->win + R->win;
+			p1->lost = p1->lost + R->lost;
+			if (!(fp = fopen("RankingList.txt", "w")))
+			{
+				printf("文件打开失败！\n");
+				exit(1);
+			}
+			p1 = head;
+			while (p1->next)
+			{
+				fwrite(p1, Lenth, 1, fp);
+				p1 = p1->next;
+			}
+			flag = 1;
+			break;
+		}
+		p1 = p1->next;
+	}
+
+	if (flag==0)
+	{
+		if (!(fp = fopen("RankingList.txt", "a")))
+		{
+			printf("文件打开失败！\n");
+			exit(1);
+		}
+		fwrite(R, Lenth, 1, fp);
+	}
+
+	
+	fclose(fp);
+}
+
+void Read()
+{
+	struct Result *p1, *head;
+	head = p1 = malloc(Lenth);
+
+	FILE *fp;
+	if (!(fp = fopen("RankingList.txt", "r")))
+	{
+		printf("文件打开失败！\n");
+		exit(1);
+	}
+
+	while (fread(p1, Lenth, 1, fp))
+	{
+		if ((p1->win + p1->lost) == 0)
+		{
+			p1->probability = 0;
+		}
+		else
+		{
+			p1->probability = 1.0*p1->win / (p1->win + p1->lost);
+		}
+		p1->next = malloc(Lenth);
+		p1 = p1->next;
+		p1->next = NULL;
+	}
+	p1->next = NULL;
+	p1 = NULL;
+
+	fclose(fp);
+
+	p1 = head;
+	head = Sort(p1);
+	
+
+	p1 = head;
+	Print(p1);
+}
+
+struct Result * Sort(struct Result *head)
+{
+	struct Result *first;
+	struct Result *tail;
+	struct Result *p_min;
+	struct Result *min;
+	struct Result *p;
+	first = NULL;   
+	while (head != NULL)
+	{
+		for (p = head, min = head; p->next != NULL; p = p->next)
+		{ 
+			if (p->next->probability > min->probability)
+			{ 
+				p_min = p;
+				min = p->next;
+			} 
+		}
+		if (first == NULL)
+		{ 
+			first = min;
+			tail = min;
+		} 
+		else
+		{ 
+			tail->next = min;
+			tail = min;
+		}
+		if (min == head)
+		{ 
+			head = head->next;
+		}
+		else
+		{ p_min->next = min->next;
+		} 
+	}
+	if (first != NULL)
+	{ 
+		tail->next = NULL;
+	}
+	head = first; 
+	return head;
+}
+
+void Print(struct Result *p)
+{
+	while (p->next)
+	{
+		printf("姓名：%s  赢：%d  输：%d  胜率：%.2lf\n", p->name, p->win, p->lost,p->probability);
+		p = p->next;
+	}
+	
+}
+
+
+
+
+
+
+#include"标头.h"
+
+void main()
+{
+	interface();
+}
